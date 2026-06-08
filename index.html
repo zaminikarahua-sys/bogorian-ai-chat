@@ -1,11 +1,119 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Bogorian AI Chat</title>
+
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #0f172a;
+    }
+
+    /* Floating button */
+    #chat-button {
+      position: fixed;
+      right: 20px;
+      bottom: 20px;
+
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: #2563eb;
+      color: white;
+      border: none;
+
+      font-size: 24px;
+      cursor: pointer;
+
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    }
+
+    /* Chat box */
+    #chat-box {
+      position: fixed;
+      right: 20px;
+      bottom: 90px;
+
+      width: 350px;
+      height: 500px;
+
+      background: white;
+      border-radius: 16px;
+
+      display: none;
+      flex-direction: column;
+
+      box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+      overflow: hidden;
+    }
+
+    #chat-header {
+      background: #2563eb;
+      color: white;
+      padding: 12px;
+    }
+
+    #chat-body {
+      flex: 1;
+      padding: 10px;
+      overflow-y: auto;
+    }
+
+    #chat-input {
+      display: flex;
+      border-top: 1px solid #ddd;
+    }
+
+    #chat-input input {
+      flex: 1;
+      padding: 10px;
+      border: none;
+      outline: none;
+    }
+
+    #chat-input button {
+      padding: 10px;
+      background: #2563eb;
+      color: white;
+      border: none;
+    }
+  </style>
 </head>
+
 <body>
 
-<h1>Bogorian AI Chat Starting...</h1>
+<!-- Floating button -->
+<button id="chat-button">💬</button>
+
+<!-- Chat window -->
+<div id="chat-box">
+  <div id="chat-header">Bogorian AI</div>
+
+  <div id="chat-body">
+    <p>Hi 👋 Ask me anything about Bogorian Shop.</p>
+  </div>
+
+  <div id="chat-input">
+    <input type="text" placeholder="Type message..." />
+    <button>Send</button>
+  </div>
+</div>
+
+<script>
+  const button = document.getElementById("chat-button");
+  const box = document.getElementById("chat-box");
+
+  button.onclick = () => {
+    if (box.style.display === "flex") {
+      box.style.display = "none";
+    } else {
+      box.style.display = "flex";
+    }
+  };
+</script>
 
 </body>
 </html>
