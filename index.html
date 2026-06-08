@@ -89,13 +89,22 @@
     .msg-user {
       text-align: right;
       margin: 6px 0;
-      color: #111;
+      padding: 8px 10px;
+      background: #2563eb;
+      color: white;
+      border-radius: 12px;
+      max-width: 80%;
+      margin-left: auto;
     }
 
     .msg-ai {
       text-align: left;
       margin: 6px 0;
-      color: #2563eb;
+      padding: 8px 10px;
+      background: #f1f5f9;
+      color: #111;
+      border-radius: 12px;
+      max-width: 80%;
     }
   </style>
 </head>
@@ -108,7 +117,7 @@
   <div id="chat-header">Bogorian AI Assistant</div>
 
   <div id="chat-body">
-    <div class="msg-ai">Hi 👋 I’m Bogorian AI. Ask me anything.</div>
+    <div class="msg-ai">Hi 👋 I’m Bogorian AI. Ask me anything about Bogorian Shop.</div>
   </div>
 
   <div id="chat-input">
@@ -124,22 +133,26 @@ const body = document.getElementById("chat-body");
 const input = document.querySelector("#chat-input input");
 const sendBtn = document.querySelector("#chat-input button");
 
+/* DIFY CONFIG */
 const API_URL = "https://api.dify.ai/v1/chat-messages";
 const API_KEY = "app-jowC9sLYvfWxbXApH7g4r4AG";
 
 let conversation_id = null;
+let isLoading = false;
 
-// open/close chat
+/* open / close chat */
 button.onclick = () => {
   box.style.display = box.style.display === "flex" ? "none" : "flex";
 };
 
-// send message
+/* send message */
 async function sendMessage() {
   const message = input.value.trim();
-  if (!message) return;
+  if (!message || isLoading) return;
 
-  // show user message
+  isLoading = true;
+
+  // user message
   body.innerHTML += `<div class="msg-user">You: ${message}</div>`;
   input.value = "";
   body.scrollTop = body.scrollHeight;
@@ -155,28 +168,67 @@ async function sendMessage() {
         inputs: {},
         query: message,
         response_mode: "blocking",
-        conversation_id: conversation_id,
-        user: "bogorian-user"
+        conversation_id: conversation_id || null,
+        user: "bogorian-user-001"
       })
     });
 
+    if (!res.ok) {
+      const errText = await res.text();
+      console.log("Dify Error:", errText);
+      body.innerHTML += `<div class="msg-ai">AI Error (check console)</div>`;
+      isLoading = false;
+      return;
+    }
+
     const data = await res.json();
 
-    conversation_id = data.conversation_id;
+    if (!data || !data.answer) {
+      body.innerHTML += `<div class="msg-ai">No response from AI</div>`;
+      isLoading = false;
+      return;
+    }
 
-    body.innerHTML += `<div class="msg-ai">Bogorian AI: ${data.answer}</div>`;
+    conversation_id = data.conversation_id || conversation_id;
+
+    body.innerHTML += `<div class="msg-ai">${data.answer}</div>`;
     body.scrollTop = body.scrollHeight;
 
   } catch (err) {
-    body.innerHTML += `<div class="msg-ai">Error: Cannot connect to AI</div>`;
+    console.log(err);
+    body.innerHTML += `<div class="msg-ai">Connection error</div>`;
   }
+
+  isLoading = false;
 }
 
+/* events */
 sendBtn.onclick = sendMessage;
 
 input.addEventListener("keypress", (e) => {
   if (e.key === "Enter") sendMessage();
 });
+</script>
+
+</body>
+</html>input.addEventListener("keypress", (e) => {
+  if (e.key === "Enter") sendMessage();
+});
+
+  function showTyping() {
+  const el = document.createElement("div");
+  el.id = "typing";
+  el.className = "msg-ai";
+  el.innerHTML = "Bogorian AI is typing...";
+  body.appendChild(el);
+  body.scrollTop = body.scrollHeight;
+}
+
+function removeTyping() {
+  const el = document.getElementById("typing");
+  if (el) el.remove();
+}
+  
 </script>
 
 </body>
