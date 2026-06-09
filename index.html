@@ -6,12 +6,18 @@
   <title>Bogorian AI Chat</title>
 
   <style>
+    /* =========================
+       GLOBAL (IMPORTANT FIX)
+    ========================== */
     body {
       margin: 0;
       font-family: Arial, sans-serif;
-      background: #0f172a;
+      background: transparent !important;
     }
 
+    /* =========================
+       FLOATING BUTTON
+    ========================== */
     #chat-button {
       position: fixed;
       right: 20px;
@@ -27,9 +33,13 @@
       font-size: 24px;
       cursor: pointer;
 
-      z-index: 9999;
+      z-index: 999999;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
     }
 
+    /* =========================
+       CHAT BOX (GLASS STYLE)
+    ========================== */
     #chat-box {
       position: fixed;
       right: 20px;
@@ -38,33 +48,41 @@
       width: 340px;
       height: 500px;
 
-      background: rgba(255,255,255,0.95);
+      background: rgba(255,255,255,0.08);
+      backdrop-filter: blur(16px);
+
+      border: 1px solid rgba(255,255,255,0.15);
       border-radius: 16px;
 
       display: none;
       flex-direction: column;
 
       overflow: hidden;
-      z-index: 9999;
+      z-index: 999999;
     }
 
+    /* HEADER */
     #chat-header {
-      background: #2563eb;
+      background: rgba(37,99,235,0.8);
       color: white;
       padding: 12px;
       font-weight: bold;
+      text-align: center;
     }
 
+    /* CHAT BODY */
     #chat-body {
       flex: 1;
       padding: 10px;
       overflow-y: auto;
       font-size: 14px;
+      color: white;
     }
 
+    /* INPUT AREA */
     #chat-input {
       display: flex;
-      border-top: 1px solid #ddd;
+      border-top: 1px solid rgba(255,255,255,0.1);
     }
 
     #chat-input input {
@@ -72,6 +90,8 @@
       padding: 10px;
       border: none;
       outline: none;
+      background: rgba(255,255,255,0.08);
+      color: white;
     }
 
     #chat-input button {
@@ -82,8 +102,8 @@
       cursor: pointer;
     }
 
+    /* MESSAGES */
     .msg-user {
-      text-align: right;
       margin: 6px 0;
       padding: 8px 10px;
       background: #2563eb;
@@ -91,34 +111,36 @@
       border-radius: 12px;
       max-width: 80%;
       margin-left: auto;
+      text-align: right;
     }
 
     .msg-ai {
-      text-align: left;
       margin: 6px 0;
       padding: 8px 10px;
-      background: #f1f5f9;
-      color: #111;
+      background: rgba(255,255,255,0.1);
+      color: white;
       border-radius: 12px;
       max-width: 80%;
     }
 
     .typing {
-      font-style: italic;
       opacity: 0.6;
+      font-style: italic;
     }
   </style>
 </head>
 
 <body>
 
+<!-- FLOAT BUTTON -->
 <button id="chat-button">💬</button>
 
+<!-- CHAT WINDOW -->
 <div id="chat-box">
   <div id="chat-header">Bogorian AI Assistant</div>
 
   <div id="chat-body">
-    <div class="msg-ai">Hi 👋 Ask me anything about Bogorian Shop.</div>
+    <div class="msg-ai">Hi 👋 Ask me about Bogorian Shop products.</div>
   </div>
 
   <div id="chat-input">
@@ -128,39 +150,50 @@
 </div>
 
 <script>
+/* =========================
+   CONFIG (DIFY API)
+========================= */
+const API_URL = "https://api.dify.ai/v1/chat-messages";
+const API_KEY = "app-gDfDvsZgBQ7f9bTNhVnFgvxA";
+
+/* =========================
+   ELEMENTS
+========================= */
 const button = document.getElementById("chat-button");
 const box = document.getElementById("chat-box");
 const body = document.getElementById("chat-body");
 const input = document.querySelector("#chat-input input");
 const sendBtn = document.querySelector("#chat-input button");
 
-const API_URL = "https://api.dify.ai/v1/chat-messages";
-const API_KEY = "app-gDfDvsZgBQ7f9bTNhVnFgvxA";
-
 let conversation_id = null;
 let isLoading = false;
 
-/* toggle chat */
+/* =========================
+   TOGGLE CHAT
+========================= */
 button.onclick = () => {
   box.style.display = box.style.display === "flex" ? "none" : "flex";
-  if (box.style.display === "flex") box.style.display = "flex";
 };
 
-/* safe message render */
+/* =========================
+   SAFE MESSAGE ADD
+========================= */
 function addMessage(text, type) {
   const div = document.createElement("div");
   div.className = type === "user" ? "msg-user" : "msg-ai";
-  div.innerText = text; // IMPORTANT: avoids weird HTML bugs
+  div.innerText = text; // SAFE (no weird HTML bugs)
   body.appendChild(div);
   body.scrollTop = body.scrollHeight;
 }
 
-/* typing */
+/* =========================
+   TYPING
+========================= */
 function showTyping() {
   const div = document.createElement("div");
   div.id = "typing";
   div.className = "msg-ai typing";
-  div.innerText = "Bogorian AI is typing...";
+  div.innerText = "AI is typing...";
   body.appendChild(div);
   body.scrollTop = body.scrollHeight;
 }
@@ -170,7 +203,9 @@ function removeTyping() {
   if (el) el.remove();
 }
 
-/* send message */
+/* =========================
+   SEND MESSAGE
+========================= */
 async function sendMessage() {
   const message = input.value.trim();
   if (!message || isLoading) return;
@@ -186,8 +221,8 @@ async function sendMessage() {
     const res = await fetch(API_URL, {
       method: "POST",
       headers: {
-        "Content-Type": "application/json",
-        "Authorization": "Bearer " + API_KEY
+        "Authorization": "Bearer " + API_KEY,
+        "Content-Type": "application/json"
       },
       body: JSON.stringify({
         inputs: {},
@@ -202,7 +237,6 @@ async function sendMessage() {
 
     removeTyping();
 
-    /* CLEAN DIFY RESPONSE FIX */
     const reply =
       data.answer ||
       data.data?.answer ||
@@ -221,7 +255,9 @@ async function sendMessage() {
   isLoading = false;
 }
 
-/* events */
+/* =========================
+   EVENTS
+========================= */
 sendBtn.onclick = sendMessage;
 
 input.addEventListener("keydown", (e) => {
